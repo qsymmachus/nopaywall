@@ -6,44 +6,39 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/prometheus/common/log"
-	"golang.org/x/net/html"
 )
 
 const DefaultURL = "https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"
 
-func LoadPage(url string) (*html.Tokenizer, error) {
+func LoadPage(url string) (*http.Response, error) {
 	response, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
 
-	tokenizer := html.NewTokenizer(response.Body)
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("Unexpected status code: %s", response.Status)
+	}
 
-	return tokenizer, nil
+	return response, nil
 }
 
-func ParseParagraphs(tokenizer *html.Tokenizer) string {
+func ParseParagraphs(response *http.Response) (string, error) {
+	defer response.Body.Close()
 	var paragraphs []string
 
-	for {
-		nextToken := tokenizer.Next()
-
-		switch nextToken {
-		case html.StartTagToken:
-			token := tokenizer.Token()
-
-			isParagraph := token.Data == "p"
-			if isParagraph {
-				tokenizer.Next()
-				text := tokenizer.Token().Data
-				paragraphs = append(paragraphs, text)
-			}
-		case html.ErrorToken:
-			// This usually means we hit the end of the document.
-			return strings.Join(paragraphs, "\n\n")
-		}
+	doc, err := goquery.NewDocumentFromResponse(response)
+	if err != nil {
+		return "", err
 	}
+
+	doc.Find("p").Each(func(i int, s *goquery.Selection) {
+		paragraphs = append(paragraphs, s.Text())
+	})
+
+	return strings.Join(paragraphs, "\n\n"), nil
 }
 
 func main() {
@@ -55,7 +50,10 @@ func main() {
 		log.Error(err)
 	}
 
-	paragraphs := ParseParagraphs(tokenizer)
+	paragraphs, err := ParseParagraphs(tokenizer)
+	if err != nil {
+		log.Error(err)
+	}
 
 	fmt.Println(paragraphs)
 }
