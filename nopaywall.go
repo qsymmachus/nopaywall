@@ -12,6 +12,7 @@ import (
 
 const DefaultURL = "https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"
 
+// Sends an HTTP request to the specified URL and returns the response.
 func LoadPage(url string) (*http.Response, error) {
 	response, err := http.Get(url)
 	if err != nil {
@@ -25,6 +26,8 @@ func LoadPage(url string) (*http.Response, error) {
 	return response, nil
 }
 
+// Given an HTTP response, finds all HTML <p> tags and extracts their text content.
+// Returns a plaintext string of all the extracted text.
 func ParseParagraphs(response *http.Response) (string, error) {
 	defer response.Body.Close()
 	var paragraphs []string
@@ -41,6 +44,11 @@ func ParseParagraphs(response *http.Response) (string, error) {
 	return strings.Join(paragraphs, "\n\n"), nil
 }
 
+// Retrieves the document at the URL specified by the '-url' flag, and prints a plaintext
+// representation of its content to standard output. For example:
+//
+//  nopaywall -url=http://example.com
+//
 func main() {
 	url := flag.String("url", DefaultURL, "URL of the page you'd like to read")
 	flag.Parse()
