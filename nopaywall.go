@@ -10,7 +10,10 @@ import (
 	"github.com/prometheus/common/log"
 )
 
-const DefaultURL = "https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"
+const (
+	DefaultURL   = "https://en.wikipedia.org/wiki/%22Hello,_World!%22_program"
+	TextSelector = "p, h1, h2, h3, h4, h5, h6"
+)
 
 // Sends an HTTP request to the specified URL and returns the response.
 func LoadPage(url string) (*http.Response, error) {
@@ -26,26 +29,27 @@ func LoadPage(url string) (*http.Response, error) {
 	return response, nil
 }
 
-// Given an HTTP response, finds all HTML <p> tags and extracts their text content.
-// Returns a plaintext string of all the extracted text.
-func ParseParagraphs(response *http.Response) (string, error) {
+// Given an HTTP response, finds all HTML "text" tags and extracts their text content.
+// What we consider a "text tag" is defined in the `TextSelector` constant. Returns a
+// plaintext string of all the extracted text.
+func ExtractText(response *http.Response) (string, error) {
 	defer response.Body.Close()
-	var paragraphs []string
+	var textContents []string
 
 	doc, err := goquery.NewDocumentFromResponse(response)
 	if err != nil {
 		return "", err
 	}
 
-	doc.Find("p").Each(func(i int, s *goquery.Selection) {
-		paragraphs = append(paragraphs, s.Text())
+	doc.Find(TextSelector).Each(func(i int, s *goquery.Selection) {
+		textContents = append(textContents, s.Text())
 	})
 
-	return strings.Join(paragraphs, "\n\n"), nil
+	return strings.Join(textContents, "\n\n"), nil
 }
 
-// Retrieves the document at the URL specified by the '-url' flag, and prints a plaintext
-// representation of its content to standard output. For example:
+// Retrieves the document at the URL specified by the '-url' flag, and prints a
+// plaintext representation of its content to standard output. For example:
 //
 //  nopaywall -url=http://example.com
 //
@@ -53,15 +57,15 @@ func main() {
 	url := flag.String("url", DefaultURL, "URL of the page you'd like to read")
 	flag.Parse()
 
-	tokenizer, err := LoadPage(*url)
+	response, err := LoadPage(*url)
 	if err != nil {
 		log.Error(err)
 	}
 
-	paragraphs, err := ParseParagraphs(tokenizer)
+	text, err := ExtractText(response)
 	if err != nil {
 		log.Error(err)
 	}
 
-	fmt.Println(paragraphs)
+	fmt.Println(text)
 }
