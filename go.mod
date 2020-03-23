@@ -1,4 +1,4 @@
-module github.com/qsymmachus/nopaywall
+module github.com/qsymmachus/plain
 
 go 1.13
 
