@@ -42,10 +42,25 @@ func ExtractText(response *http.Response) (string, error) {
 	}
 
 	doc.Find(TextSelector).Each(func(i int, s *goquery.Selection) {
-		textContents = append(textContents, s.Text())
+		textContents = append(textContents, FormatText(s))
 	})
 
 	return strings.Join(textContents, "\n\n"), nil
+}
+
+// Extracts and formats the text from a selected HTML tag. We capitalize headers, and
+// remove extra newlines that may be in paragraphs.
+func FormatText(s *goquery.Selection) string {
+	var text string
+
+	switch s.Nodes[0].Data {
+	case "p":
+		text = strings.ReplaceAll(s.Text(), "\n", " ")
+	case "h1", "h2", "h3", "h4", "h5", "h6":
+		text = strings.ToUpper(s.Text())
+	}
+
+	return text
 }
 
 // Retrieves the document at the URL specified by the '-url' flag, and prints a
