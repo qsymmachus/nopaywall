@@ -15,6 +15,21 @@ const (
 	TextSelector = "p, h1, h2, h3, h4, h5, h6"
 )
 
+// Given a URL, extracts the text we care about and returns it as a string ("make it plain!")
+func MakePlain(url string) string {
+	response, err := LoadPage(url)
+	if err != nil {
+		log.Error(err)
+	}
+
+	text, err := ExtractText(response)
+	if err != nil {
+		log.Error(err)
+	}
+
+	return text
+}
+
 // Sends an HTTP request to the specified URL and returns the response.
 func LoadPage(url string) (*http.Response, error) {
 	response, err := http.Get(url)
@@ -72,15 +87,7 @@ func main() {
 	url := flag.String("url", DefaultURL, "URL of the page you'd like to read")
 	flag.Parse()
 
-	response, err := LoadPage(*url)
-	if err != nil {
-		log.Error(err)
-	}
-
-	text, err := ExtractText(response)
-	if err != nil {
-		log.Error(err)
-	}
+	text := MakePlain(*url)
 
 	fmt.Println(text)
 }
