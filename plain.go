@@ -24,19 +24,19 @@ func main() {
 	url := flag.String("url", DefaultURL, "URL of the page you'd like to read")
 	flag.Parse()
 
-	text := MakePlain(*url)
+	text := makePlain(*url)
 
 	fmt.Println(text)
 }
 
 // Given a URL, extracts the text we care about and returns it as a string ("make it plain!")
-func MakePlain(url string) string {
-	response, err := LoadPage(url)
+func makePlain(url string) string {
+	response, err := loadPage(url)
 	if err != nil {
 		log.Error(err)
 	}
 
-	text, err := ExtractText(response)
+	text, err := extractText(response)
 	if err != nil {
 		log.Error(err)
 	}
@@ -45,7 +45,7 @@ func MakePlain(url string) string {
 }
 
 // Sends an HTTP request to the specified URL and returns the response.
-func LoadPage(url string) (*http.Response, error) {
+func loadPage(url string) (*http.Response, error) {
 	response, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func LoadPage(url string) (*http.Response, error) {
 // Given an HTTP response, finds all HTML "text" tags and extracts their text content.
 // What we consider a "text tag" is defined in the `TextSelector` constant. Returns a
 // plaintext string of all the extracted text.
-func ExtractText(response *http.Response) (string, error) {
+func extractText(response *http.Response) (string, error) {
 	defer response.Body.Close()
 	var textContents []string
 
@@ -71,7 +71,7 @@ func ExtractText(response *http.Response) (string, error) {
 	}
 
 	doc.Find(TextSelector).Each(func(i int, s *goquery.Selection) {
-		textContents = append(textContents, FormatText(s))
+		textContents = append(textContents, formatText(s))
 	})
 
 	return strings.Join(textContents, "\n\n"), nil
@@ -79,7 +79,7 @@ func ExtractText(response *http.Response) (string, error) {
 
 // Extracts and formats the text from a selected HTML tag. We capitalize headers, and
 // remove extra newlines that may be in paragraphs.
-func FormatText(s *goquery.Selection) string {
+func formatText(s *goquery.Selection) string {
 	var text string
 
 	switch s.Nodes[0].Data {
