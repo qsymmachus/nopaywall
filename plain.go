@@ -15,6 +15,20 @@ const (
 	TextSelector = "p, h1, h2, h3, h4, h5, h6"
 )
 
+// Retrieves the document at the URL specified by the '--url' flag, and prints a
+// plaintext representation of its content to standard output. For example:
+//
+//  plain --url=http://example.com
+//
+func main() {
+	url := flag.String("url", DefaultURL, "URL of the page you'd like to read")
+	flag.Parse()
+
+	text := MakePlain(*url)
+
+	fmt.Println(text)
+}
+
 // Given a URL, extracts the text we care about and returns it as a string ("make it plain!")
 func MakePlain(url string) string {
 	response, err := LoadPage(url)
@@ -76,18 +90,4 @@ func FormatText(s *goquery.Selection) string {
 	}
 
 	return text
-}
-
-// Retrieves the document at the URL specified by the '-url' flag, and prints a
-// plaintext representation of its content to standard output. For example:
-//
-//  nopaywall -url=http://example.com
-//
-func main() {
-	url := flag.String("url", DefaultURL, "URL of the page you'd like to read")
-	flag.Parse()
-
-	text := MakePlain(*url)
-
-	fmt.Println(text)
 }
