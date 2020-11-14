@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
@@ -62,6 +63,10 @@ func loadPage(url string) (*http.Response, error) {
 // What we consider a "text tag" is defined in the `TextSelector` constant. Returns a
 // plaintext string of all the extracted text.
 func extractText(response *http.Response) (string, error) {
+	if response == nil {
+		return "", errors.New("Nothing to see here!")
+	}
+
 	defer response.Body.Close()
 	var textContents []string
 
@@ -80,6 +85,10 @@ func extractText(response *http.Response) (string, error) {
 // Extracts and formats the text from a selected HTML tag. We capitalize headers, and
 // remove extra newlines that may be in paragraphs.
 func formatText(s *goquery.Selection) string {
+	if s == nil {
+		return ""
+	}
+
 	var text string
 
 	switch s.Nodes[0].Data {
