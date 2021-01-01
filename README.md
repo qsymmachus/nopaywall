@@ -17,16 +17,16 @@ go install github.com/qsymmachus/plain
 Usage
 -----
 
-The `plain` command accepts one parameter, a `-url` flag. It will download the page at that address, extract the article's text, and print it out as plaintext. Here's an example:
+The `plain` command accepts a `-url` flag. It will download the page at that address, extract the article's text, and print it out as plaintext. Here's an example:
 
 ```shell
-plain -url=https://henrikwarne.com/2020/03/22/secure-by-design/
+plain -url https://henrikwarne.com/2020/03/22/secure-by-design/
 ```
 
-This just prints the article text to standard output. This means you can also output it to a file, or pipe it to do more interesting things with the text. For example, here's a flow I use to read an article outside of the shell (note that the `open` command only works on macOS):
+This just prints the article text to standard output. Optionally, you may output the text to a file using the `-file` flag:
 
 ```shell
-plain -url=https://henrikwarne.com/2020/03/22/secure-by-design/ > article.txt && open article.txt
+plain -url https://henrikwarne.com/2020/03/22/secure-by-design/ -file secure-by-design.txt
 ```
 
 __A few caveats:__ the program is not very clever. Currently it just extracts the text from all paragraph and header tags. This means that other text that might be relevant will be skipped, and it can't handle non-HTML content at all. I'll keep working on it, but as-is, it works well for most text articles you'll encounter.

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -16,18 +17,31 @@ const (
 	TextSelector = "p, h1, h2, h3, h4, h5, h6"
 )
 
-// Retrieves the document at the URL specified by the '--url' flag, and prints a
+// Retrieves the document at the URL specified by the '-url' flag, and prints a
 // plaintext representation of its content to standard output. For example:
 //
-//  plain --url=http://example.com
+//   plain -url http://example.com
+//
+// Optionally you can output the text to a file instead using the '-file' flag:
+//
+//   plain -url http://example.com -file example-output.txt
 //
 func main() {
 	url := flag.String("url", DefaultURL, "URL of the page you'd like to read")
+	filepath := flag.String("file", "", "Optional filepath to output the page text")
 	flag.Parse()
 
 	text := makePlain(*url)
 
-	fmt.Println(text)
+	if *filepath != "" {
+		if err := ioutil.WriteFile(*filepath, []byte(text), 0666); err != nil {
+			fmt.Printf("Failed to write text to '%s'\n", *filepath)
+			log.Error(err)
+		}
+		fmt.Printf("Text successfully written to '%s'\n", *filepath)
+	} else {
+		fmt.Println(text)
+	}
 }
 
 // Given a URL, extracts the text we care about and returns it as a string ("make it plain!")
