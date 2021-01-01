@@ -37,8 +37,9 @@ func main() {
 		if err := ioutil.WriteFile(*filepath, []byte(text), 0666); err != nil {
 			fmt.Printf("Failed to write text to '%s'\n", *filepath)
 			log.Error(err)
+		} else {
+			fmt.Printf("Text successfully written to '%s'\n", *filepath)
 		}
-		fmt.Printf("Text successfully written to '%s'\n", *filepath)
 	} else {
 		fmt.Println(text)
 	}
